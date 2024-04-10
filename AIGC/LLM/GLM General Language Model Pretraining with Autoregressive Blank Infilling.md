@@ -452,11 +452,63 @@ Given a labeled example $(\mathbf{x},y)$:
 
 -  ![image-20240410191143494](mdimgs/GLM General Language Model Pretraining with Autoregressive Blank Infilling/image-20240410191143494.png)
 
-   
+For text generation tasks, the given context constitutes the Part A of the input, with a masked token append at the end.
 
-   
+The model generates the text of Part B autoregressively.
 
-   
+Can directly apply the pretrained GLM for unconditional generation, or finetune it on downstream conditional generation tasks.
 
-   
+### 2.4 Discussion and Analysis
+
+Mainly concerned with how they can be adapted to downstream blank infilling tasks.
+
+#### Comparison with BERT
+
+*Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019. BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. In NAACL 2019, pages 4171–4186*
+
+*Zhilin Yang, Zihang Dai, Yiming Yang, Jaime Carbonell, Ruslan Salakhutdinov, and Quoc V. Le. 2019. XLNet: Generalized Autoregressive Pretraining for Language Understanding. In NeurIPS 2019, pages 5754–5764.*   
+
+BERT fails to capture the interdependencies of masked tokens, due to the independence assumption of MLM.
+
+BERT cannot fill in the blanks of multiple tokens properly.
+
+To infer the probability of an answer of length $l$, BERT needs to perform $l$ consecutive predictions.
+
+If the length $l$ is unknown, we may need to enumerate all possible lengths, since BERT needs to change the number of [MASK] tokens according to the length.
+
+#### XLNet
+
+XLNet uses the original position encodings before corruption. 
+
+During inference, we need to either know or enumerate the length of the answer, same as BERT.
+
+XLNet uses a two-stream self-attention mechanism, instead of the right-shift, to avoid the information leak within Transformer. It doubles the time cost of pretraining.
+
+**信息泄露**：在自回归语言模型中，模型应当只能使用当前位置之前的信息来预测下一个词。如果模型在预测时不慎利用到了未来的信息，这就称为信息泄露。信息泄露会导致模型学习出不准确的依赖关系，因为它在训练时使用了不应该知道的信息。
+
+XLNet为了防止信息泄露，设计了一种特殊的自注意力机制，称为双流自注意力（two-stream  self-attention）。这种机制维持两套隐藏状态：一套用于表示当前词的内容信息（content  information），另一套用于表示位置信息（position  information）。这允许模型在预测下一个词时利用到所有词的内容信息，同时又不泄露位置信息。
+
+**right-shift**：在其他自回归模型（比如GPT）中，通常通过将输入序列向右移动一位来防止信息泄露，这样模型在预测当前词时就无法看到它本身。
+
+双流自注意力机制增加了模型预训练的计算量。具体来说，由于需要同时维护两套隐藏状态，并且在训练过程中对每一个词都要进行两次注意力计算（一次用于内容，一次用于位置），这导致预训练的时间成本翻倍。
+
+#### T5
+
+*Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, and Peter J. Liu. 2020. Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer. J. Mach. Learn. Res., 21:140:1– 140:67.*
+
+T5 proposes a similar blank infilling objective to pretrain an encoder-decoder Transformer.
+
+T5 uses independent positional encodings for the encoder and decoder, and relies on multiple sentinel tokens to differentiate the masked spans.
+
+In downstream tasks, only one of the sentinel tokens is used, leading to a waste of model capacity and inconsistency between pretraining and finetuning.
+
+T5 always predicts spans in a fixed left-to-right order.
+
+#### UniLM
+
+*Li Dong, Nan Yang, Wenhui Wang, Furu Wei, Xiaodong Liu, Yu Wang, Jianfeng Gao, Ming Zhou, and Hsiao-Wuen Hon. 2019. Unified language model pre-training for natural language understanding and generation. In NeurIPS 2019, pages 13042– 13054*
+
+UniLM combines different pretraining objectives under the autoencoding framework by changing the attention mask among bidirectional, unidirectional  and cross attention. 
+
+UniLM always replaces masked spans with [MASK] tokens, which limits it ability to model the dependencies between the masked spans and their context.
 
