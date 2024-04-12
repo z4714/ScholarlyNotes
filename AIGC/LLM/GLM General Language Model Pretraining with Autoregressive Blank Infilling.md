@@ -266,7 +266,7 @@ train the model to sequentially reconstruct the spans
 
 ==span shuffling== & ==2D positional encoding==
 
-*same amount of parameters and computational cost, GLM significantly outperforms BERT on the SuperGLUE benchmark by a large margin of 4.6% – 5.0% and outperforms RoBERTa and BART when pretrained on a corpus of similar size (158GB).GLM also significantly outperforms T5 on NLU and generation tasks with fewer parameters and data*
+*same amount of parameters and computational cost, GLM significantly outperforms BERT on the SuperGLUE benchmark by a large margin of 4.6% – 5.0% and outperforms RoBERTa and BART when pretrained on a corpus of similar size (158GB).GLM also significantly outperforms T5 on NLU and generation tasks with fewer parameters and data*
 
 *Inspired by Pattern-Exploiting Training (PET) (Schick and Schütze, 2020a), we reformulate NLU tasks as ==manually-crafted cloze questions that mimic human language.==*
 
@@ -512,3 +512,72 @@ UniLM combines different pretraining objectives under the autoencoding framework
 
 UniLM always replaces masked spans with [MASK] tokens, which limits it ability to model the dependencies between the masked spans and their context.
 
+GLM feeds in the previous token and autoregressively generates the next token.
+
+Finetuning UniLM on downstream generation tasks also relies on masked language modeling, which is less effcient.
+
+*UniLMv2 (Bao et al., 2020) adopts partially autoregressive modeling for generation tasks, along with the autoencoding objective for NLU tasks. Instead, GLM unifies NLU and generation tasks with autoregressive pretraining*
+
+## 3. Experiments
+
+### 3.1 Pretraining Setup
+
+For a fair comparison with BERT:
+
+pretraining data: BooksCorpus, English Wikipedia
+
+*Yukun Zhu, Ryan Kiros, Richard S. Zemel, Ruslan Salakhutdinov, Raquel Urtasun, Antonio Torralba, and Sanja Fidler. 2015. Aligning books and movies: Towards story-like visual explanations by watching movies and reading books. In ICCV 2015, pages 19– 27.*
+
+Use the uncased wordpiece tokenizer of BERT with 30k vocabulary
+
+Parameters:
+
+​	110M : $GLM_{Base}$ --- $BERT_{Base}$
+
+​	340M: $GLM_{Large}$ --- $BERT_{Large}$
+
+For multi-task pretraining, two Large-sized models were trained,
+
+with a mixture of the blank infilling objective 
+
+and the document-level or sentence-level objective, 
+
+denoted as $GLM_{Doc}$ and $GLM_{Sent}$
+
+Additionally:
+
+​	$GLM_{410M}$: 30 layers, hidden size 1024, and 16 attention heads
+
+​	$GLM_{515M}$: 30 layers, hidden size 1152, and 18 attention heads
+
+with document-level multi-task pretraining.
+
+SOTA:
+
+​	$GLM_{RoBERTa}$: same data, tokenization, and hyperparameters as RoBERTa 
+
+*Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen, Omer Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov. 2019. Roberta: A robustly optimized BERT pre*
+
+Only pretrain the model for 250000 steps, which are half of RoBERTa and BART's, close to T5 in the number of trained tokens.
+
+### 3.2 SuperGLUE
+
+SuperGLUE benchmark: *Alex Wang, Yada Pruksachatkun, Nikita Nangia, Amanpreet Singh, Julian Michael, Felix Hill, Omer Levy, and Samuel R. Bowman. 2019. SuperGLUE: A Stickier Benchmark for General-Purpose Language Understanding Systems. In NeurIPS 2019, pages 3261–3275*
+
+SuperGLUE consists of 8 challenging NLU tasks.
+
+The classification tasks are reformulated as blank infilling with human-crafted cloze questions, following PET.
+
+Finetuned
+
+Report the performance of standard finetuning (i.e. classification on the [CLS] token representation).
+
+The only exception is WiC (word sense disambiguation)
+
+### 3.3 Multi-Task Pretraining
+
+Within one training batch, sample short spans and longer spans (document-level or sentence-level) with equal chances.
+
+#### NLU-SuperGLUE
+
+![image-20240412153235116](mdimgs/GLM General Language Model Pretraining with Autoregressive Blank Infilling/image-20240412153235116.png)
