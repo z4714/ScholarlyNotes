@@ -581,3 +581,5 @@ Within one training batch, sample short spans and longer spans (document-level o
 #### NLU-SuperGLUE
 
 ![image-20240412153235116](mdimgs/GLM General Language Model Pretraining with Autoregressive Blank Infilling/image-20240412153235116.png)
+
+#### Seq2Seq
