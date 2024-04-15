@@ -583,3 +583,56 @@ Within one training batch, sample short spans and longer spans (document-level o
 ![image-20240412153235116](mdimgs/GLM General Language Model Pretraining with Autoregressive Blank Infilling/image-20240412153235116.png)
 
 #### Seq2Seq
+
+##### Pretrained on BookCorpus & Wikipedia
+
+Use the ==Gigaword dataset== for abstractive summarization: 
+
+*Alexander M. Rush, Sumit Chopra, and Jason Weston. 2015. A neural attention model for abstractive sentence summarization. In EMNLP 2015, pages 379– 389.*
+
+and ==SQuAD 1.1 dataset== for question generation
+
+*Xinya Du, Junru Shao, and Claire Cardie. 2017. Learning to Ask: Neural Question Generation for Reading Comprehension. In ACL 2017, pages 1342–1352.*
+
+##### Pretrained on larger corpora
+
+CNN/DailyMail & XSum datasets for abstractive summarization
+
+*Abigail See, Peter J. Liu, and Christopher D. Manning. 2017. Get To The Point: Summarization with Pointer-Generator Networks. In ACL 2017, pages 1073–1083*
+
+*Shashi Narayan, Shay B. Cohen, and Mirella Lapata. 2018. Don’t Give Me the Details, Just the Summary! Topic-Aware Convolutional Neural Networks for Extreme Summarization. In EMNLP 2018, pages 1797–1807.*
+
+![image-20240413122238110](mdimgs/GLM General Language Model Pretraining with Autoregressive Blank Infilling/image-20240413122238110.png)
+
+![image-20240413122249359](mdimgs/GLM General Language Model Pretraining with Autoregressive Blank Infilling/image-20240413122249359.png)
+
+This indicates that the document-level objective, which teaches the model to extend the given contexts, is less helpful to conditional generation, which aims to extract useful information form the context.
+
+#### Text Infilling
+
+Predicting missing spans of text which are consistent with the surrounding context.
+
+**Yahoo Answers dataset**
+
+*Zichao Yang, Zhiting Hu, Ruslan Salakhutdinov, and Taylor Berg-Kirkpatrick. 2017. Improved variational autoencoders for text modeling using dilated convolutions. In ICML 2017, volume 70, pages 3881–3890.*
+
+Compared with **Blank Language Model**
+
+*Tianxiao Shen, Victor Quach, Regina Barzilay, and Tommi S. Jaakkola. 2020. Blank language models. pages 5186–5198*
+
+![image-20240414171924762](mdimgs/GLM General Language Model Pretraining with Autoregressive Blank Infilling/image-20240414171924762.png)
+
+#### Language Modeling
+
+Language modeling perplexity:
+
+语言模型困惑度（perplexity）是衡量语言模型性能的一个指标。困惑度是基于模型对测试数据集进行概率预测的质量来计算的。具体来说，一个困惑度较低的模型对数据集有更好的预测准确性，它对文本中下一个词的预测更为自信。
+
+**Held-out test set**：“held-out test set”是指在模型训练过程中没有使用过的一部分数据，它用来评估模型的泛化能力。换言之，模型在训练时没有见过这些数据，因此测试集可以用来准确地衡量模型对新数据的处理能力 —— 20M tokens, denoted as BookWiki
+
+
+
+Also evaluate GLM on the LAMBADA dataset —— long-range dependencies in text
+
+*Denis Paperno, Germán Kruszewski, Angeliki Lazaridou, Quan Ngoc Pham, Raffaella Bernardi, Sandro Pezzelle, Marco Baroni, Gemma Boleda, and Raquel Fernández. 2016. The LAMBADA dataset: Word prediction requiring a broad discourse context. In ACL 2016.*
+
